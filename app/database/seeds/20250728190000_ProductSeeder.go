@@ -5,13 +5,17 @@ import (
 	"log"
 	"time"
 
+	"math/rand"
+	"strconv"
+
+	"github.com/go-faker/faker/v4"
 	"gorm.io/gorm"
 )
 
 func SeedProductSeeder(db *gorm.DB) error {
 	log.Println("🌱 Seeding ProductSeeder...")
 
-	// Contoh seeder product base
+	// Seeder product base
 	base := models.ProductBase{
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
@@ -20,50 +24,31 @@ func SeedProductSeeder(db *gorm.DB) error {
 		return err
 	}
 
-	// Contoh seeder produk varian
-	products := []models.Product{
-		{
+	// Seeder 20 produk varian dengan faker
+	var products []models.Product
+	for i := 1; i <= 20; i++ {
+		name := faker.Name() + " - Varian " + string(rune('A'+i-1))
+		products = append(products, models.Product{
 			ProductBaseID:     base.ID,
-			Name:              "Produk Contoh - Varian A",
-			Slug:              "produk-contoh-varian-a",
-			Brand:             "BrandA",
-			ShortDescription:  "Deskripsi pendek varian A",
-			LongDescription:   "Deskripsi panjang varian A",
-			Weight:            1.2,
-			Dimension1:        1.0,
-			Dimension2:        0.5,
-			Dimension3:        0.3,
-			Koli:              1,
-			SKU:               "SKU-A",
-			LowestRetailPrice: 10000,
+			Name:              name,
+			Slug:              faker.Username(),
+			Brand:             faker.Word(),
+			ShortDescription:  faker.Sentence(),
+			LongDescription:   faker.Paragraph(),
+			Weight:            float64(rand.Intn(400)+100) / 100.0, // 1.00 - 5.00
+			Dimension1:        float64(rand.Intn(190)+10) / 100.0,  // 0.10 - 2.00
+			Dimension2:        float64(rand.Intn(190)+10) / 100.0,
+			Dimension3:        float64(rand.Intn(190)+10) / 100.0,
+			Koli:              rand.Intn(5) + 1,
+			SKU:               faker.Word() + strconv.Itoa(rand.Intn(100)),
+			LowestRetailPrice: float64(rand.Intn(40001) + 10000), // 10000 - 50000
 			BranchPrices:      "{}",
-			Stock:             10,
-			Images:            []string{"imageA1.jpg", "imageA2.jpg"},
+			Stock:             rand.Intn(100) + 1,
+			Images:            []string{faker.URL(), faker.URL()},
 			ReceivedAt:        time.Now(),
 			CreatedAt:         time.Now(),
 			UpdatedAt:         time.Now(),
-		},
-		{
-			ProductBaseID:     base.ID,
-			Name:              "Produk Contoh - Varian B",
-			Slug:              "produk-contoh-varian-b",
-			Brand:             "BrandA",
-			ShortDescription:  "Deskripsi pendek varian B",
-			LongDescription:   "Deskripsi panjang varian B",
-			Weight:            1.3,
-			Dimension1:        1.1,
-			Dimension2:        0.6,
-			Dimension3:        0.4,
-			Koli:              1,
-			SKU:               "SKU-B",
-			LowestRetailPrice: 12000,
-			BranchPrices:      "{}",
-			Stock:             8,
-			Images:            []string{"imageB1.jpg"},
-			ReceivedAt:        time.Now(),
-			CreatedAt:         time.Now(),
-			UpdatedAt:         time.Now(),
-		},
+		})
 	}
 	if err := db.Create(&products).Error; err != nil {
 		return err
