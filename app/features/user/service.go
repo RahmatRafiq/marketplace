@@ -2,7 +2,6 @@ package user
 
 import (
 	"golang_starter_kit_2025/app/features/role"
-	"golang_starter_kit_2025/app/models"
 	"golang_starter_kit_2025/facades"
 
 	"gorm.io/gorm/clause"
@@ -56,11 +55,11 @@ func (*UserService) AssignRolesToUser(userId string, roles []uint) error {
 	}
 
 	// Clear existing roles for the user
-	facades.DB.Where("user_id = ?", user.ID).Delete(&models.UserHasRole{})
+	facades.DB.Where("user_id = ?", user.ID).Delete(&UserHasRole{})
 
 	// Assign new roles
 	for _, roleId := range roles {
-		userRole := models.UserHasRole{
+		userRole := UserHasRole{
 			UserID: user.ID,
 			RoleID: roleId,
 		}

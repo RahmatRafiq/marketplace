@@ -1,5 +1,5 @@
 -- +++ UP Migration
-CREATE TABLE users_has_roles (
+CREATE TABLE user_has_roles (
 	id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL,
     role_id BIGINT NOT NULL,
@@ -9,4 +9,4 @@ CREATE TABLE users_has_roles (
     FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
 );
 -- --- DOWN Migration
-DROP TABLE IF EXISTS users_has_roles;
+DROP TABLE IF EXISTS user_has_roles;
