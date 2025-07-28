@@ -1,7 +1,7 @@
 package seeds
 
 import (
-	"golang_starter_kit_2025/app/models"
+	"golang_starter_kit_2025/app/features/category"
 	"log"
 	"time"
 
@@ -11,7 +11,7 @@ import (
 func SeedCategorySeeder(db *gorm.DB) error {
 	log.Println("🌱 Seeding CategorySeeder...")
 
-	categories := []models.Category{
+	categories := []category.Category{
 		{Category: "Elektronik", CreatedAt: time.Now(), UpdatedAt: time.Now()},
 		{Category: "Fashion", CreatedAt: time.Now(), UpdatedAt: time.Now()},
 		{Category: "Makanan", CreatedAt: time.Now(), UpdatedAt: time.Now()},
@@ -24,5 +24,5 @@ func SeedCategorySeeder(db *gorm.DB) error {
 
 func RollbackCategorySeeder(db *gorm.DB) error {
 	log.Println("🗑️ Rolling back CategorySeeder…")
-	return db.Unscoped().Where("category IN ?", []string{"Elektronik", "Fashion", "Makanan"}).Delete(&models.Category{}).Error
+	return db.Unscoped().Where("category IN ?", []string{"Elektronik", "Fashion", "Makanan"}).Delete(&category.Category{}).Error
 }

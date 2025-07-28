@@ -1,25 +1,21 @@
-package controllers
+package product
 
 import (
 	"errors"
-	"net/http"
-
 	"golang_starter_kit_2025/app/helpers"
-	"golang_starter_kit_2025/app/models"
-	"golang_starter_kit_2025/app/requests"
-	"golang_starter_kit_2025/app/services"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
 
 type ProductController struct {
-	service *services.ProductService
+	service *ProductService
 }
 
 func NewProductController() *ProductController {
 	return &ProductController{
-		service: services.NewProductService(),
+		service: NewProductService(),
 	}
 }
 
@@ -28,11 +24,11 @@ func NewProductController() *ProductController {
 // @Tags			Product
 // @Accept			json
 // @Produce		json
-// @Param			request	query		requests.FilterRequest	false	"Filter request"
-// @Success		200		{object}	helpers.ResponseParams[models.Product]{data=[]models.Product}
+// @Param			request	query		FilterRequest	false	"Filter request"
+// @Success		200		{object}	helpers.ResponseParams[Product]{data=[]Product}
 // @Router			/products [get]
 func (c *ProductController) GetAll(ctx *gin.Context) {
-	var filters requests.FilterRequest
+	var filters FilterRequest // Ganti dengan FilterRequest lokal jika sudah dimodularisasi
 	if err := ctx.ShouldBindQuery(&filters); err != nil {
 		helpers.ResponseError(ctx, &helpers.ResponseParams[any]{
 			Message:   "Parameter tidak valid",
@@ -51,7 +47,7 @@ func (c *ProductController) GetAll(ctx *gin.Context) {
 		return
 	}
 
-	helpers.ResponseSuccess(ctx, &helpers.ResponseParams[models.Product]{Data: &products}, http.StatusOK)
+	helpers.ResponseSuccess(ctx, &helpers.ResponseParams[Product]{Data: &products}, http.StatusOK)
 }
 
 // @Summary		Get product by ID
@@ -60,7 +56,7 @@ func (c *ProductController) GetAll(ctx *gin.Context) {
 // @Accept			json
 // @Produce		json
 // @Param			id	path		int	true	"Product ID"
-// @Success		200	{object}	helpers.ResponseParams[models.Product]{item=models.Product}
+// @Success		200	{object}	helpers.ResponseParams[Product]{item=Product}
 // @Router			/products/{id} [get]
 func (c *ProductController) GetByID(ctx *gin.Context) {
 	id := ctx.Param("id")
@@ -74,7 +70,7 @@ func (c *ProductController) GetByID(ctx *gin.Context) {
 		return
 	}
 
-	helpers.ResponseSuccess(ctx, &helpers.ResponseParams[models.Product]{Item: &product}, http.StatusOK)
+	helpers.ResponseSuccess(ctx, &helpers.ResponseParams[Product]{Item: &product}, http.StatusOK)
 }
 
 // @Summary		Create/Update product
@@ -82,11 +78,11 @@ func (c *ProductController) GetByID(ctx *gin.Context) {
 // @Tags			Product
 // @Accept			json
 // @Produce		json
-// @Param			product	body		requests.ProductRequest	true	"Product request body"
-// @Success		200		{object}	helpers.ResponseParams[models.Product]{item=models.Product}
+// @Param			product	body		ProductRequest	true	"Product request body"
+// @Success		200		{object}	helpers.ResponseParams[Product]{item=Product}
 // @Router			/products [put]
 func (c *ProductController) Put(ctx *gin.Context) {
-	var request requests.ProductRequest
+	var request ProductRequest
 	if err := ctx.ShouldBind(&request); err != nil {
 		var verr validator.ValidationErrors
 		if errors.As(err, &verr) {
@@ -109,7 +105,7 @@ func (c *ProductController) Put(ctx *gin.Context) {
 		return
 	}
 
-	helpers.ResponseSuccess(ctx, &helpers.ResponseParams[models.Product]{Item: product}, http.StatusOK)
+	helpers.ResponseSuccess(ctx, &helpers.ResponseParams[Product]{Item: product}, http.StatusOK)
 }
 
 // @Summary		Delete product
@@ -118,7 +114,7 @@ func (c *ProductController) Put(ctx *gin.Context) {
 // @Accept			json
 // @Produce		json
 // @Param			id	path		int	true	"Product ID"
-// @Success		200	{object}	helpers.ResponseParams[models.Product]
+// @Success		200	{object}	helpers.ResponseParams[Product]
 // @Router			/products/{id} [delete]
 func (c *ProductController) Delete(ctx *gin.Context) {
 	id := ctx.Param("id")

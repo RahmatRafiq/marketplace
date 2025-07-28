@@ -1,22 +1,22 @@
-package controllers
+package permission
 
 import (
 	"errors"
 
 	"golang_starter_kit_2025/app/helpers"
-	"golang_starter_kit_2025/app/models"
-	"golang_starter_kit_2025/app/services"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
 
-type PermissionController struct {
-	service services.PermissionService
+func NewPermissionController() *PermissionController {
+	return &PermissionController{
+		service: NewPermissionService(),
+	}
 }
 
-func NewPermissionController(service services.PermissionService) *PermissionController {
-	return &PermissionController{service: service}
+type PermissionController struct {
+	service *PermissionService
 }
 
 // @Summary		Get All Permissions
@@ -24,7 +24,7 @@ func NewPermissionController(service services.PermissionService) *PermissionCont
 // @Tags			Permission
 // @Accept			json
 // @Produce		json
-// @Success		200	{object}	helpers.ResponseParams[models.Permission]{data=[]models.Permission}
+// @Success		200	{object}	helpers.ResponseParams[Permission]{data=[]Permission}
 // @Router			/permissions [get]
 func (c *PermissionController) List(ctx *gin.Context) {
 	permissions, err := c.service.GetAll()
@@ -37,7 +37,7 @@ func (c *PermissionController) List(ctx *gin.Context) {
 		return
 	}
 
-	helpers.ResponseSuccess(ctx, &helpers.ResponseParams[models.Permission]{Data: &permissions}, 200)
+	helpers.ResponseSuccess(ctx, &helpers.ResponseParams[Permission]{Data: &permissions}, 200)
 }
 
 // @Summary		Create/Update Permission
@@ -46,10 +46,10 @@ func (c *PermissionController) List(ctx *gin.Context) {
 // @Accept			json
 // @Produce		json
 // @Param			permission	body		requests.PermissionRequest	true	"Permission Data"
-// @Success		200			{object}	helpers.ResponseParams[models.Permission]{item=models.Permission}
+// @Success		200			{object}	helpers.ResponseParams[Permission]{item=Permission}
 // @Router			/permissions [put]
 func (c *PermissionController) Put(ctx *gin.Context) {
-	var permission models.Permission
+	var permission Permission
 	if err := ctx.ShouldBindJSON(&permission); err != nil {
 		var verr validator.ValidationErrors
 		if errors.As(err, &verr) {
@@ -78,7 +78,7 @@ func (c *PermissionController) Put(ctx *gin.Context) {
 		return
 	}
 
-	helpers.ResponseSuccess(ctx, &helpers.ResponseParams[models.Permission]{Item: &updatedPermission}, 200)
+	helpers.ResponseSuccess(ctx, &helpers.ResponseParams[Permission]{Item: &updatedPermission}, 200)
 }
 
 // @Summary		Delete Permission
@@ -87,7 +87,7 @@ func (c *PermissionController) Put(ctx *gin.Context) {
 // @Accept			json
 // @Produce		json
 // @Param			id	path		string	true	"Permission ID"
-// @Success		200	{object}	helpers.ResponseParams[models.Permission]{}
+// @Success		200	{object}	helpers.ResponseParams[Permission]{}
 // @Router			/permissions/{id} [delete]
 func (c *PermissionController) Delete(ctx *gin.Context) {
 	id := ctx.Param("id")
@@ -100,5 +100,5 @@ func (c *PermissionController) Delete(ctx *gin.Context) {
 		return
 	}
 
-	helpers.ResponseSuccess(ctx, &helpers.ResponseParams[models.Permission]{Message: "Permission deleted"}, 200)
+	helpers.ResponseSuccess(ctx, &helpers.ResponseParams[Permission]{Message: "Permission deleted"}, 200)
 }

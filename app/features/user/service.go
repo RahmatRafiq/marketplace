@@ -1,7 +1,7 @@
-package services
+package user
 
 import (
-	"golang_starter_kit_2025/app/models"
+	"golang_starter_kit_2025/app/features/role"
 	"golang_starter_kit_2025/facades"
 
 	"gorm.io/gorm/clause"
@@ -9,23 +9,26 @@ import (
 
 type UserService struct{}
 
-func (*UserService) GetAllUsers() ([]models.User, error) {
-	var users []models.User
+func NewUserService() *UserService {
+	return &UserService{}
+}
+func (*UserService) GetAllUsers() ([]User, error) {
+	var users []User
 	if err := facades.DB.Find(&users).Error; err != nil {
 		return nil, err
 	}
 	return users, nil
 }
 
-func (*UserService) Find(id string) (models.User, error) {
-	var user models.User
+func (*UserService) Find(id string) (User, error) {
+	var user User
 	if err := facades.DB.First(&user, id).Error; err != nil {
 		return user, err
 	}
 	return user, nil
 }
 
-func (*UserService) Put(user models.User) (models.User, error) {
+func (*UserService) Put(user User) (User, error) {
 
 	if err := facades.DB.Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "id"}},
@@ -38,7 +41,7 @@ func (*UserService) Put(user models.User) (models.User, error) {
 }
 
 func (*UserService) Delete(id string) error {
-	var user models.User
+	var user User
 	if err := facades.DB.First(&user, id).Error; err != nil {
 		return err
 	}
@@ -46,17 +49,17 @@ func (*UserService) Delete(id string) error {
 }
 
 func (*UserService) AssignRolesToUser(userId string, roles []uint) error {
-	var user models.User
+	var user User
 	if err := facades.DB.First(&user, userId).Error; err != nil {
 		return err
 	}
 
 	// Clear existing roles for the user
-	facades.DB.Where("user_id = ?", user.ID).Delete(&models.UserHasRole{})
+	facades.DB.Where("user_id = ?", user.ID).Delete(&UserHasRole{})
 
 	// Assign new roles
 	for _, roleId := range roles {
-		userRole := models.UserHasRole{
+		userRole := UserHasRole{
 			UserID: user.ID,
 			RoleID: roleId,
 		}
@@ -67,8 +70,8 @@ func (*UserService) AssignRolesToUser(userId string, roles []uint) error {
 
 	return nil
 }
-func (*UserService) GetRolesByUserId(userId string) ([]models.Role, error) {
-	var roles []models.Role
+func (*UserService) GetRolesByUserId(userId string) ([]role.Role, error) {
+	var roles []role.Role
 	if err := facades.DB.Table("roles").
 		Select("roles.*").
 		Joins("join user_has_roles on roles.id = user_has_roles.role_id").

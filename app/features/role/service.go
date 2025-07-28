@@ -1,26 +1,31 @@
-package services
+package role
 
 import (
 	"errors"
 
+	"golang_starter_kit_2025/app/features/permission"
 	"golang_starter_kit_2025/app/models"
 	"golang_starter_kit_2025/facades"
 )
 
 type RoleService struct{}
 
-func (*RoleService) GetAll() ([]models.Role, error) {
-	var roles []models.Role
+func NewRoleService() *RoleService {
+	return &RoleService{}
+}
+
+func (*RoleService) GetAll() ([]Role, error) {
+	var roles []Role
 	if err := facades.DB.Find(&roles).Error; err != nil {
 		return nil, err
 	}
 	return roles, nil
 }
 
-func (*RoleService) Put(updatedRole models.Role) (models.Role, error) {
-	var role models.Role
+func (*RoleService) Put(updatedRole Role) (Role, error) {
+	var role Role
 
-	if count := facades.DB.Model(&models.Role{}).Where("id = ?", updatedRole.ID).Find(&map[string]interface{}{}).RowsAffected; count == 0 {
+	if count := facades.DB.Model(&Role{}).Where("id = ?", updatedRole.ID).Find(&map[string]interface{}{}).RowsAffected; count == 0 {
 		if err := facades.DB.Create(&updatedRole).Error; err != nil {
 			return role, err
 		}
@@ -38,7 +43,7 @@ func (*RoleService) Put(updatedRole models.Role) (models.Role, error) {
 }
 
 func (*RoleService) Delete(id string) error {
-	var role models.Role
+	var role Role
 	if err := facades.DB.First(&role, id).Error; err != nil {
 		return err
 	}
@@ -46,7 +51,7 @@ func (*RoleService) Delete(id string) error {
 }
 
 func (*RoleService) AssignPermissionsToRole(roleId string, permissions []uint) error {
-	var role models.Role
+	var role Role
 	if err := facades.DB.First(&role, roleId).Error; err != nil {
 		return err
 	}
@@ -76,8 +81,8 @@ func (*RoleService) AssignPermissionsToRole(roleId string, permissions []uint) e
 	return nil
 }
 
-func (*RoleService) GetPermissionsByRoleId(roleId string) ([]models.Permission, error) {
-	var permissions []models.Permission
+func (*RoleService) GetPermissionsByRoleId(roleId string) ([]permission.Permission, error) {
+	var permissions []permission.Permission
 	if err := facades.DB.Table("permissions").
 		Select("permissions.*").
 		Joins("join role_has_permissions on permissions.id = role_has_permissions.permission_id").

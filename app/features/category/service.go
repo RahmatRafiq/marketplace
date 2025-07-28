@@ -1,7 +1,6 @@
-package services
+package category
 
 import (
-	"golang_starter_kit_2025/app/models"
 	"golang_starter_kit_2025/facades"
 
 	"gorm.io/gorm/clause"
@@ -9,26 +8,29 @@ import (
 
 type CategoryService struct{}
 
-func (*CategoryService) GetAllCategories() ([]models.Category, error) {
-	var categories []models.Category
+func NewCategoryService() *CategoryService {
+	return &CategoryService{}
+}
+
+func (s *CategoryService) GetAll() ([]Category, error) {
+	var categories []Category
 	if err := facades.DB.Find(&categories).Error; err != nil {
 		return nil, err
 	}
 	return categories, nil
 }
 
-func (*CategoryService) GetCategoryByID(id string) (models.Category, error) {
-	var category models.Category
+func (s *CategoryService) GetByID(id string) (Category, error) {
+	var category Category
 	if err := facades.DB.First(&category, id).Error; err != nil {
 		return category, err
 	}
 	return category, nil
 }
 
-// Menggabungkan Create dan Update dalam satu fungsi PutCategory
-func (*CategoryService) PutCategory(category models.Category) (models.Category, error) {
+func (s *CategoryService) Put(category Category) (Category, error) {
 	if err := facades.DB.Clauses(clause.OnConflict{
-		Columns:   []clause.Column{{Name: "id"}}, // Kolom yang digunakan untuk menentukan konflik
+		Columns:   []clause.Column{{Name: "id"}},
 		DoUpdates: clause.AssignmentColumns([]string{"category", "updated_at"}),
 	}).Create(&category).Error; err != nil {
 		return category, err
@@ -36,8 +38,8 @@ func (*CategoryService) PutCategory(category models.Category) (models.Category, 
 	return category, nil
 }
 
-func (*CategoryService) DeleteCategory(id string) error {
-	var category models.Category
+func (s *CategoryService) Delete(id string) error {
+	var category Category
 	if err := facades.DB.First(&category, id).Error; err != nil {
 		return err
 	}

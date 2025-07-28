@@ -1,23 +1,23 @@
-package controllers
+package role
 
 import (
 	"errors"
 	"net/http"
 
 	"golang_starter_kit_2025/app/helpers"
-	"golang_starter_kit_2025/app/models"
-	"golang_starter_kit_2025/app/services"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
 
-type RoleController struct {
-	service services.RoleService
+func NewRoleController() *RoleController {
+	return &RoleController{
+		service: NewRoleService(),
+	}
 }
 
-func NewRoleController(service services.RoleService) *RoleController {
-	return &RoleController{service: service}
+type RoleController struct {
+	service *RoleService
 }
 
 // @Summary		Get All Roles
@@ -25,7 +25,7 @@ func NewRoleController(service services.RoleService) *RoleController {
 // @Tags			Role
 // @Accept			json
 // @Produce		json
-// @Success		200	{object}	helpers.ResponseParams[models.Role]{data=[]models.Role}
+// @Success		200	{object}	helpers.ResponseParams[Role]{data=[]Role}
 // @Router			/roles [get]
 func (c *RoleController) List(ctx *gin.Context) {
 	roles, err := c.service.GetAll()
@@ -38,7 +38,7 @@ func (c *RoleController) List(ctx *gin.Context) {
 		return
 	}
 
-	helpers.ResponseSuccess(ctx, &helpers.ResponseParams[models.Role]{Data: &roles}, 200)
+	helpers.ResponseSuccess(ctx, &helpers.ResponseParams[Role]{Data: &roles}, 200)
 }
 
 // @Summary		Create/Update Role
@@ -47,10 +47,10 @@ func (c *RoleController) List(ctx *gin.Context) {
 // @Accept			json
 // @Produce		json
 // @Param			role	body		requests.RoleRequestPut	true	"Role Data"
-// @Success		200		{object}	helpers.ResponseParams[models.Role]{item=models.Role}
+// @Success		200		{object}	helpers.ResponseParams[Role]{item=Role}
 // @Router			/roles [put]
 func (c *RoleController) Put(ctx *gin.Context) {
-	var role models.Role
+	var role Role
 	if err := ctx.ShouldBindJSON(&role); err != nil {
 		var verr validator.ValidationErrors
 		if errors.As(err, &verr) {
@@ -78,7 +78,7 @@ func (c *RoleController) Put(ctx *gin.Context) {
 		return
 	}
 
-	helpers.ResponseSuccess(ctx, &helpers.ResponseParams[models.Role]{Item: &updatedRole}, 200)
+	helpers.ResponseSuccess(ctx, &helpers.ResponseParams[Role]{Item: &updatedRole}, 200)
 }
 
 // @Summary		Delete Role

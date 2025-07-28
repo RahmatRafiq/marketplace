@@ -1,24 +1,24 @@
 package routes
 
 import (
-	"net/http"
-
 	"golang_starter_kit_2025/app/controllers"
+	"golang_starter_kit_2025/app/features/category"
+	"golang_starter_kit_2025/app/features/permission"
+	"golang_starter_kit_2025/app/features/product"
+	"golang_starter_kit_2025/app/features/role"
+	"golang_starter_kit_2025/app/features/user"
 	"golang_starter_kit_2025/app/middleware"
 	"golang_starter_kit_2025/app/services"
 	"golang_starter_kit_2025/facades"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 func RegisterRoutes(route *gin.Engine) {
-	// Routes untuk test table (PostgreSQL, multi koneksi, tanpa auth)
-
-	// Public route: Hello World
 	controller := controllers.Controller{}
 	route.GET("", controller.HelloWorld)
 
-	// Public route: Login and Logout (no auth required)
 	authService := services.AuthService{}
 	authController := controllers.NewAuthController(authService)
 	route.PUT("/auth/login", authController.Login)
@@ -28,31 +28,26 @@ func RegisterRoutes(route *gin.Engine) {
 		authRoutes.GET("/refresh", authController.Refresh)
 	}
 
-	// Routes untuk categories (protected by AuthMiddleware)
-	categoryService := services.CategoryService{}
-	categoryController := controllers.NewCategoryController(categoryService)
-	categoryRoutes := route.Group("/categories", middleware.AuthMiddleware()) // Protect category routes
+	categoryController := category.NewCategoryController()
+	categoryRoutes := route.Group("/categories")
 	{
-		categoryRoutes.GET("/", categoryController.List)         // List categories
-		categoryRoutes.GET("/:id", categoryController.Get)       // Show/Edit category (GET by ID)
-		categoryRoutes.PUT("/", categoryController.Put)          // Create/Update category
-		categoryRoutes.DELETE("/:id", categoryController.Delete) // Delete category by ID
+		categoryRoutes.GET("/", categoryController.List)
+		categoryRoutes.GET("/:id", categoryController.Get)
+		categoryRoutes.PUT("/", categoryController.Put)
+		categoryRoutes.DELETE("/:id", categoryController.Delete)
 	}
 
-	// Routes untuk products (protected by AuthMiddleware)
-	productController := controllers.NewProductController()
-	productRoutes := route.Group("/products", middleware.AuthMiddleware()) // Protect product routes
+	productController := product.NewProductController()
+	productRoutes := route.Group("/products")
 	{
-		productRoutes.GET("/", productController.GetAll)       // List all products
-		productRoutes.GET("/:id", productController.GetByID)   // Show/Edit product by ID
-		productRoutes.PUT("/", productController.Put)          // Create/Update product
-		productRoutes.DELETE("/:id", productController.Delete) // Delete product by ID
+		productRoutes.GET("/", productController.GetAll)
+		productRoutes.GET("/:id", productController.GetByID)
+		productRoutes.PUT("/", productController.Put)
+		productRoutes.DELETE("/:id", productController.Delete)
 	}
 
-	// Routes untuk users (protected by AuthMiddleware)
-	userService := services.UserService{}
-	userController := controllers.NewUserController(userService)
-	userRoutes := route.Group("/users", middleware.AuthMiddleware()) // Protect user routes
+	userController := user.NewUserController()
+	userRoutes := route.Group("/users", middleware.AuthMiddleware())
 	{
 		userRoutes.GET("", userController.List)
 		userRoutes.GET("/:id", userController.Get)
@@ -62,26 +57,22 @@ func RegisterRoutes(route *gin.Engine) {
 		userRoutes.GET("/:id/roles", userController.GetRoles)
 	}
 
-	// Routes untuk roles (protected by AuthMiddleware)
-	roleService := services.RoleService{}
-	roleController := controllers.NewRoleController(roleService)
-	roleRoutes := route.Group("/roles", middleware.AuthMiddleware()) // Protect role routes
+	roleController := role.NewRoleController()
+	roleRoutes := route.Group("/roles", middleware.AuthMiddleware())
 	{
-		roleRoutes.GET("", roleController.List)                               // List roles
-		roleRoutes.PUT("", roleController.Put)                                // Create/Update role
-		roleRoutes.DELETE("/:id", roleController.Delete)                      // Delete role by ID
-		roleRoutes.POST("/:id/permissions", roleController.AssignPermissions) // Assign permissions to role
-		roleRoutes.GET("/:id/permissions", roleController.GetPermissions)     // Get permissions for role
+		roleRoutes.GET("", roleController.List)
+		roleRoutes.PUT("", roleController.Put)
+		roleRoutes.DELETE("/:id", roleController.Delete)
+		roleRoutes.POST("/:id/permissions", roleController.AssignPermissions)
+		roleRoutes.GET("/:id/permissions", roleController.GetPermissions)
 	}
 
-	// Routes untuk permissions (protected by AuthMiddleware)
-	permissionService := services.PermissionService{}
-	permissionController := controllers.NewPermissionController(permissionService)
-	permissionRoutes := route.Group("/permissions", middleware.AuthMiddleware()) // Protect permission routes
+	permissionController := permission.NewPermissionController()
+	permissionRoutes := route.Group("/permissions", middleware.AuthMiddleware())
 	{
-		permissionRoutes.GET("", permissionController.List)          // List all permissions
-		permissionRoutes.PUT("", permissionController.Put)           // Create/Update permission
-		permissionRoutes.DELETE("/:id", permissionController.Delete) // Delete permission by ID
+		permissionRoutes.GET("", permissionController.List)
+		permissionRoutes.PUT("", permissionController.Put)
+		permissionRoutes.DELETE("/:id", permissionController.Delete)
 	}
 
 	fileController := controllers.NewFileController()
@@ -90,7 +81,6 @@ func RegisterRoutes(route *gin.Engine) {
 		fileRoutes.GET("/:key/:filename", fileController.ServeFile)
 	}
 
-	// Database management routes (protected by AuthMiddleware)
 	databaseController := controllers.NewDatabaseController()
 	databaseRoutes := route.Group("/api/database")
 	{
@@ -99,9 +89,8 @@ func RegisterRoutes(route *gin.Engine) {
 		databaseRoutes.GET("/test", databaseController.TestConnection)
 	}
 
-	// Endpoint untuk mengecek kesehatan koneksi facades
 	route.GET("/health", func(c *gin.Context) {
-		sqlDB, err := facades.DB.DB() // Mengambil facades/sql *DB dari GORM *DB
+		sqlDB, err := facades.DB.DB()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": "Failed to get facades connection",
@@ -110,7 +99,7 @@ func RegisterRoutes(route *gin.Engine) {
 			return
 		}
 
-		err = sqlDB.Ping() // Menggunakan sqlDB untuk ping ke facades
+		err = sqlDB.Ping()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": "facades connection failed",
@@ -121,11 +110,10 @@ func RegisterRoutes(route *gin.Engine) {
 
 		c.JSON(200, gin.H{
 			"message": "facades is connected",
-			"facades": "supply_chain_retail", // Sesuaikan dengan nama facades Anda
+			"facades": "supply_chain_retail",
 		})
 	})
 
-	// Multi-database health check endpoint (public)
 	route.GET("/health/databases", func(c *gin.Context) {
 		manager := facades.GetManager()
 		health := make(map[string]interface{})

@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"golang_starter_kit_2025/app/casts"
+	"golang_starter_kit_2025/app/features/user"
 	"golang_starter_kit_2025/app/helpers"
-	"golang_starter_kit_2025/app/models"
 	"golang_starter_kit_2025/app/requests"
 	"golang_starter_kit_2025/facades"
 
@@ -21,39 +21,31 @@ type AuthService struct {
 }
 
 func (auth *AuthService) Login(request requests.LoginRequest) (*casts.Token, error) {
-	var user models.User
-	if err := facades.DB.Where("email = ?", request.Email).First(&user).Error; err != nil {
-		return nil, errors.New("Email atau password salah")
+	var u user.User
+	if err := facades.DB.Where("email = ?", request.Email).First(&u).Error; err != nil {
+		return nil, errors.New("email atau password salah")
 	}
 
-	// if !CheckPasswordHash(request.Password, user.Password) {
-	// 	return "", errors.New("Email atau password salah")
-	// }
-	check, err := helpers.ComparePasswordArgon2(request.Password, user.Password)
+	check, err := helpers.ComparePasswordArgon2(request.Password, u.Password)
 	if err != nil {
-		return nil, errors.New("Email atau password salah")
+		return nil, errors.New("email atau password salah")
 	}
 	if !check {
-		return nil, errors.New("Email atau password salah")
+		return nil, errors.New("email atau password salah")
 	}
-
-	// NOW: user can login multiple times
-	// if user.JwtToken != "" {
-	// 	return "", errors.New("Logout terlebih dahulu")
-	// }
 
 	expires := helpers.GetEnvInt("JWT_EXPIRE_MINUTES", 60)
 	expireAt := time.Now().Add(time.Minute * time.Duration(expires)).Unix()
 	// Generate JWT token
-	tokenString, err := auth.jwt.GenerateToken(casts.NewJwtClaims(user.ID, expireAt))
+	tokenString, err := auth.jwt.GenerateToken(casts.NewJwtClaims(u.ID, expireAt))
 
 	if err != nil {
 		return nil, err
 	}
 
 	// Update user with the new token
-	user.JwtToken = tokenString
-	if err := facades.DB.Save(&user).Error; err != nil {
+	u.JwtToken = tokenString
+	if err := facades.DB.Save(&u).Error; err != nil {
 		return nil, err
 	}
 
@@ -77,13 +69,13 @@ func (auth *AuthService) Logout(tokenString string) error {
 	userId := claims["user_id"]
 
 	// Hapus JWT token dari database
-	var user models.User
-	if err := facades.DB.Where("id = ?", userId).First(&user).Error; err != nil {
+	var u user.User
+	if err := facades.DB.Where("id = ?", userId).First(&u).Error; err != nil {
 		return errors.New("user not found")
 	}
 
-	user.JwtToken = ""
-	if err := facades.DB.Save(&user).Error; err != nil {
+	u.JwtToken = ""
+	if err := facades.DB.Save(&u).Error; err != nil {
 		return err
 	}
 
@@ -104,19 +96,22 @@ func (auth *AuthService) RefreshToken(tokenString string) (*casts.Token, error) 
 	userId := claims["user_id"]
 
 	// Ambil user dari database
-	var user models.User
-	if err := facades.DB.Where("id = ?", userId).First(&user).Error; err != nil {
+	var u user.User
+	if err := facades.DB.Where("id = ?", userId).First(&u).Error; err != nil {
 		return nil, errors.New("user not found")
 	}
 
 	// Generate JWT token
 	expires := helpers.GetEnvInt("JWT_EXPIRE_MINUTES", 60)
 	expireAt := time.Now().Add(time.Minute * time.Duration(expires)).Unix()
-	tokenString, err = auth.jwt.GenerateToken(casts.NewJwtClaims(user.ID, expireAt))
+	tokenString, err = auth.jwt.GenerateToken(casts.NewJwtClaims(u.ID, expireAt))
+	if err != nil {
+		return nil, err
+	}
 
 	// Update user dengan token baru
-	user.JwtToken = tokenString
-	if err := facades.DB.Save(&user).Error; err != nil {
+	u.JwtToken = tokenString
+	if err := facades.DB.Save(&u).Error; err != nil {
 		return nil, err
 	}
 
