@@ -1,8 +1,8 @@
 package seeds
 
 import (
+	"golang_starter_kit_2025/app/features/user"
 	"golang_starter_kit_2025/app/helpers"
-	"golang_starter_kit_2025/app/models"
 	"log"
 	"time"
 
@@ -12,7 +12,7 @@ import (
 func SeedUserSeeder(db *gorm.DB) error {
 	log.Println("🌱 Seeding UserSeeder...")
 
-	data := models.User{
+	data := user.User{
 		Reference: helpers.GenerateReference("USR"),
 		Username:  "admin",
 		Email:     "admin@example.com",
@@ -30,6 +30,6 @@ func RollbackUserSeeder(db *gorm.DB) error {
 	log.Println("🗑️ Rolling back UserSeeder…")
 	return db.Unscoped().
 		Where("username = ?", "admin").
-		Delete(&models.User{}).
+		Delete(&user.User{}).
 		Error
 }

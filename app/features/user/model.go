@@ -3,8 +3,8 @@ package user
 import (
 	"time"
 
+	"golang_starter_kit_2025/app/features/role"
 	"golang_starter_kit_2025/app/helpers"
-	"golang_starter_kit_2025/app/models"
 
 	"gorm.io/gorm"
 )
@@ -22,7 +22,7 @@ type User struct {
 	UpdatedAt time.Time      `gorm:"autoUpdateTime" json:"updated_at" swaggerignore:"true"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at" swaggerignore:"true"`
 
-	Roles []models.Role `gorm:"many2many:user_has_roles;" json:"roles" swaggerignore:"true"`
+	Roles []role.Role `gorm:"many2many:user_has_roles;" json:"roles" swaggerignore:"true"`
 }
 
 func (u *User) BeforeCreate(tx *gorm.DB) (err error) {

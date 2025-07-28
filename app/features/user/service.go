@@ -1,6 +1,7 @@
 package user
 
 import (
+	"golang_starter_kit_2025/app/features/role"
 	"golang_starter_kit_2025/app/models"
 	"golang_starter_kit_2025/facades"
 
@@ -70,8 +71,8 @@ func (*UserService) AssignRolesToUser(userId string, roles []uint) error {
 
 	return nil
 }
-func (*UserService) GetRolesByUserId(userId string) ([]models.Role, error) {
-	var roles []models.Role
+func (*UserService) GetRolesByUserId(userId string) ([]role.Role, error) {
+	var roles []role.Role
 	if err := facades.DB.Table("roles").
 		Select("roles.*").
 		Joins("join user_has_roles on roles.id = user_has_roles.role_id").

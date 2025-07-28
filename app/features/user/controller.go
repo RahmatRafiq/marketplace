@@ -1,6 +1,8 @@
 package user
 
 import (
+	"golang_starter_kit_2025/app/features/role"
+	"golang_starter_kit_2025/app/helpers"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -30,10 +32,14 @@ type UserController struct {
 func (c *UserController) List(ctx *gin.Context) {
 	users, err := c.service.GetAllUsers()
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		helpers.ResponseError(ctx, &helpers.ResponseParams[any]{
+			Message:   "Gagal mengambil data user",
+			Reference: "USER-1",
+			Errors:    map[string]string{"error": err.Error()},
+		}, http.StatusInternalServerError)
 		return
 	}
-	ctx.JSON(http.StatusOK, users)
+	helpers.ResponseSuccess(ctx, &helpers.ResponseParams[User]{Data: &users}, http.StatusOK)
 }
 
 // @Summary      Get a user by ID
@@ -48,10 +54,14 @@ func (c *UserController) Get(ctx *gin.Context) {
 	id := ctx.Param("id")
 	user, err := c.service.Find(id)
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		helpers.ResponseError(ctx, &helpers.ResponseParams[any]{
+			Message:   "User tidak ditemukan",
+			Reference: "USER-2",
+			Errors:    map[string]string{"error": err.Error()},
+		}, http.StatusNotFound)
 		return
 	}
-	ctx.JSON(http.StatusOK, user)
+	helpers.ResponseSuccess(ctx, &helpers.ResponseParams[User]{Item: &user}, http.StatusOK)
 }
 
 // @Summary      Create or update a user
@@ -67,15 +77,23 @@ func (c *UserController) Get(ctx *gin.Context) {
 func (c *UserController) Put(ctx *gin.Context) {
 	var user User
 	if err := ctx.ShouldBindJSON(&user); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		helpers.ResponseError(ctx, &helpers.ResponseParams[any]{
+			Message:   "Data tidak valid",
+			Reference: "USER-3",
+			Errors:    map[string]string{"error": err.Error()},
+		}, http.StatusBadRequest)
 		return
 	}
 	updatedUser, err := c.service.Put(user)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		helpers.ResponseError(ctx, &helpers.ResponseParams[any]{
+			Message:   "Gagal menyimpan user",
+			Reference: "USER-4",
+			Errors:    map[string]string{"error": err.Error()},
+		}, http.StatusInternalServerError)
 		return
 	}
-	ctx.JSON(http.StatusOK, updatedUser)
+	helpers.ResponseSuccess(ctx, &helpers.ResponseParams[User]{Item: &updatedUser}, http.StatusOK)
 }
 
 // @Summary      Delete a user by ID
@@ -90,10 +108,14 @@ func (c *UserController) Put(ctx *gin.Context) {
 func (c *UserController) Delete(ctx *gin.Context) {
 	id := ctx.Param("id")
 	if err := c.service.Delete(id); err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		helpers.ResponseError(ctx, &helpers.ResponseParams[any]{
+			Message:   "User tidak ditemukan",
+			Reference: "USER-5",
+			Errors:    map[string]string{"error": err.Error()},
+		}, http.StatusNotFound)
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"message": "User deleted"})
+	helpers.ResponseSuccess(ctx, &helpers.ResponseParams[any]{}, http.StatusOK)
 }
 
 // @Summary      Assign roles to a user
@@ -110,18 +132,26 @@ func (c *UserController) Delete(ctx *gin.Context) {
 func (c *UserController) AssignRoles(ctx *gin.Context) {
 	var req AssignRolesRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		helpers.ResponseError(ctx, &helpers.ResponseParams[any]{
+			Message:   "Data tidak valid",
+			Reference: "USER-6",
+			Errors:    map[string]string{"error": err.Error()},
+		}, http.StatusBadRequest)
 		return
 	}
 
 	userId := ctx.Param("id")
 	err := c.service.AssignRolesToUser(userId, req.Roles)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		helpers.ResponseError(ctx, &helpers.ResponseParams[any]{
+			Message:   "Gagal assign roles",
+			Reference: "USER-7",
+			Errors:    map[string]string{"error": err.Error()},
+		}, http.StatusInternalServerError)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "Roles assigned to user"})
+	helpers.ResponseSuccess(ctx, &helpers.ResponseParams[any]{}, http.StatusOK)
 }
 
 // @Summary      Get roles of a user
@@ -136,8 +166,12 @@ func (c *UserController) GetRoles(ctx *gin.Context) {
 	userId := ctx.Param("id")
 	roles, err := c.service.GetRolesByUserId(userId)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		helpers.ResponseError(ctx, &helpers.ResponseParams[any]{
+			Message:   "Gagal mengambil roles user",
+			Reference: "USER-8",
+			Errors:    map[string]string{"error": err.Error()},
+		}, http.StatusInternalServerError)
 		return
 	}
-	ctx.JSON(http.StatusOK, roles)
+	helpers.ResponseSuccess(ctx, &helpers.ResponseParams[role.Role]{Data: &roles}, http.StatusOK)
 }

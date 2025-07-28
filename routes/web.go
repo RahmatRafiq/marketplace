@@ -43,8 +43,7 @@ func RegisterRoutes(route *gin.Engine) {
 		productRoutes.DELETE("/:id", productController.Delete)
 	}
 
-	userService := services.UserService{}
-	userController := controllers.NewUserController(userService)
+	userController := controllers.NewUserController()
 	userRoutes := route.Group("/users", middleware.AuthMiddleware())
 	{
 		userRoutes.GET("", userController.List)
