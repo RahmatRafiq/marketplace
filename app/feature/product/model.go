@@ -48,7 +48,7 @@ func (p *Product) BeforeCreate(tx *gorm.DB) (err error) {
 
 // AfterFind hook
 func (m *Product) AfterFind(tx *gorm.DB) (err error) {
-	if m.Images != nil && len(m.Images) > 0 {
+	if len(m.Images) > 0 {
 		for i, Image := range m.Images {
 			m.Images[i] = helpers.GetFileURL(Image, "member_lands")
 		}
@@ -58,7 +58,7 @@ func (m *Product) AfterFind(tx *gorm.DB) (err error) {
 
 // AfterCreate hook
 func (m *Product) AfterCreate(tx *gorm.DB) (err error) {
-	if m.Images != nil && len(m.Images) > 0 {
+	if len(m.Images) > 0 {
 		for i, image := range m.Images {
 			m.Images[i] = helpers.GetFileURL(image, "member_lands")
 		}
@@ -68,7 +68,7 @@ func (m *Product) AfterCreate(tx *gorm.DB) (err error) {
 
 // AfterUpdate hook
 func (m *Product) AfterUpdate(tx *gorm.DB) (err error) {
-	if m.Images != nil && len(m.Images) > 0 {
+	if len(m.Images) > 0 {
 		for i, image := range m.Images {
 			m.Images[i] = helpers.GetFileURL(image, "member_lands")
 		}
