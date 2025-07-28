@@ -121,11 +121,6 @@ func (service *ProductService) Put(ctx *gin.Context, request ProductRequest) (*P
 		facades.DB.Where("id IN ?", request.PromoIDs).Find(&promos)
 		product.Promos = promos
 	}
-	if len(request.RelatedIDs) > 0 {
-		var related []models.Product
-		facades.DB.Where("id IN ?", request.RelatedIDs).Find(&related)
-		product.Related = related
-	}
 
 	if count := facades.DB.Model(&Product{}).Where("id = ?", request.ID).Find(&map[string]interface{}{}).RowsAffected; count == 0 {
 		if err := facades.DB.Create(&product).Error; err != nil {

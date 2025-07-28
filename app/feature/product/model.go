@@ -32,7 +32,6 @@ type Product struct {
 
 	Categories []models.Category  `gorm:"many2many:product_categories;" json:"categories"`
 	Warehouses []models.Warehouse `gorm:"many2many:product_warehouses;" json:"warehouses"`
-	Related    []models.Product   `gorm:"many2many:product_related;association_jointable_foreignkey:related_product_id" json:"related_products"`
 	Tags       []models.Tag       `gorm:"many2many:product_tags;" json:"tags"`
 	Promos     []models.Promo     `gorm:"many2many:product_promos;" json:"promos"`
 
