@@ -53,7 +53,7 @@ func (service *ProductService) GetByID(id string) (models.Product, error) {
 func (service *ProductService) Put(ctx *gin.Context, request requests.ProductRequest) (*models.Product, error) {
 	var product models.Product
 
-	// Mengunggah file gambar produk jika ada
+	// Upload images if any
 	var filenames []string
 	if request.Images != nil {
 		for _, image := range request.Images {
@@ -66,37 +66,80 @@ func (service *ProductService) Put(ctx *gin.Context, request requests.ProductReq
 		}
 	}
 
-	if request.ID != 0 {
-		product.ID = request.ID
+	// Handle ProductBase: cari base dengan nama/slug/brand, jika tidak ada buat baru
+	var productBase models.ProductBase
+	if request.ProductBaseID != 0 {
+		facades.DB.First(&productBase, request.ProductBaseID)
+	} else {
+		// Cek base by name/slug/brand, jika tidak ada buat baru
+		facades.DB.Where("name = ? AND brand = ?", request.Name, request.Brand).FirstOrCreate(&productBase, models.ProductBase{})
 	}
 
-	if request.CategoryID != 0 {
-		product.CategoryID = request.CategoryID
-	}
+	// Map fields dari request
+	product.ID = request.ID
+	product.ProductBaseID = productBase.ID
+	product.Name = request.Name
+	product.Slug = request.Slug
+	product.Brand = request.Brand
+	product.ShortDescription = request.ShortDescription
+	product.LongDescription = request.LongDescription
+	product.Weight = request.Weight
+	product.Dimension1 = request.Dimension1
+	product.Dimension2 = request.Dimension2
+	product.Dimension3 = request.Dimension3
+	product.Koli = request.Koli
+	product.SKU = request.SKU
+	product.LowestRetailPrice = request.LowestRetailPrice
+	product.BranchPrices = request.BranchPrices
+	product.Stock = request.Stock
+	product.Images = filenames
+	product.ReceivedAt = request.ReceivedAt
 
-	if request.Name != "" {
-		product.Name = request.Name
+	// Map relasi M2M
+	if len(request.CategoryIDs) > 0 {
+		var categories []models.Category
+		facades.DB.Where("id IN ?", request.CategoryIDs).Find(&categories)
+		var categoryPtrs []*models.Category
+		for i := range categories {
+			categoryPtrs = append(categoryPtrs, &categories[i])
+		}
+		product.Categories = categoryPtrs
 	}
-	if request.Description != "" {
-		product.Description = request.Description
+	if len(request.WarehouseIDs) > 0 {
+		var warehouses []models.Warehouse
+		facades.DB.Where("id IN ?", request.WarehouseIDs).Find(&warehouses)
+		var warehousePtrs []*models.Warehouse
+		for i := range warehouses {
+			warehousePtrs = append(warehousePtrs, &warehouses[i])
+		}
+		product.Warehouses = warehousePtrs
 	}
-	if request.Price != 0 {
-		product.Price = request.Price
+	if len(request.TagIDs) > 0 {
+		var tags []models.Tag
+		facades.DB.Where("id IN ?", request.TagIDs).Find(&tags)
+		var tagPtrs []*models.Tag
+		for i := range tags {
+			tagPtrs = append(tagPtrs, &tags[i])
+		}
+		product.Tags = tagPtrs
 	}
-	if request.Margin != 0 {
-		product.Margin = request.Margin
+	if len(request.PromoIDs) > 0 {
+		var promos []models.Promo
+		facades.DB.Where("id IN ?", request.PromoIDs).Find(&promos)
+		var promoPtrs []*models.Promo
+		for i := range promos {
+			promoPtrs = append(promoPtrs, &promos[i])
+		}
+		product.Promos = promoPtrs
 	}
-	if request.Stock != 0 {
-		product.Stock = request.Stock
-	}
-	if request.Sold != 0 {
-		product.Sold = request.Sold
-	}
-	if !request.ReceivedAt.IsZero() {
-		product.ReceivedAt = request.ReceivedAt
-	}
-	if request.Images != nil {
-		product.Images = filenames
+	if len(request.RelatedIDs) > 0 {
+		var related []models.Product
+		facades.DB.Where("id IN ?", request.RelatedIDs).Find(&related)
+		var relatedPtrs []*models.Product
+		for i := range related {
+			relatedPtrs = append(relatedPtrs, &related[i])
+		}
+		product.Related = relatedPtrs
 	}
 
 	if count := facades.DB.Model(&models.Product{}).Where("id = ?", request.ID).Find(&map[string]interface{}{}).RowsAffected; count == 0 {

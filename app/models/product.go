@@ -9,21 +9,32 @@ import (
 )
 
 type Product struct {
-	ID          uint      `gorm:"primaryKey" json:"id"`
-	Reference   string    `gorm:"unique" json:"reference"`
-	StoreID     uint      `json:"store_id"`
-	CategoryID  uint      `json:"category_id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	Price       float64   `json:"price"`
-	Margin      float64   `json:"margin"`
-	Stock       int       `json:"stock"`
-	Sold        int       `json:"sold"`
-	Images      []string  `json:"images" gorm:"serializer:json"`
-	ReceivedAt  time.Time `json:"received_at"`
+	ID                uint         `gorm:"primaryKey" json:"id"`
+	Reference         string       `json:"reference"`
+	ProductBaseID     uint         `json:"product_base_id"`
+	ProductBase       *ProductBase `json:"product_base"`
+	Name              string       `json:"name"`
+	Slug              string       `json:"slug"`
+	Brand             string       `json:"brand"`
+	ShortDescription  string       `json:"short_description"`
+	LongDescription   string       `json:"long_description"`
+	Weight            float64      `json:"weight"`
+	Dimension1        float64      `json:"dimension_1" gorm:"column:dimension_1"`
+	Dimension2        float64      `json:"dimension_2" gorm:"column:dimension_2"`
+	Dimension3        float64      `json:"dimension_3" gorm:"column:dimension_3"`
+	Koli              int          `json:"koli"`
+	SKU               string       `json:"sku"`
+	LowestRetailPrice float64      `json:"lowest_retail_price"`
+	BranchPrices      string       `json:"branch_prices" gorm:"type:json"`
+	Stock             int          `json:"stock"`
+	Images            []string     `json:"images" gorm:"serializer:json"`
+	ReceivedAt        time.Time    `json:"received_at"`
 
-	// Store    *Store    `json:"store"`
-	Category *Category `json:"category"`
+	Categories []*Category  `gorm:"many2many:product_categories;" json:"categories"`
+	Warehouses []*Warehouse `gorm:"many2many:product_warehouses;" json:"warehouses"`
+	Related    []*Product   `gorm:"many2many:product_related;association_jointable_foreignkey:related_product_id" json:"related_products"`
+	Tags       []*Tag       `gorm:"many2many:product_tags;" json:"tags"`
+	Promos     []*Promo     `gorm:"many2many:product_promos;" json:"promos"`
 
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
