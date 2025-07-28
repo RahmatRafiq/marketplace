@@ -2,6 +2,7 @@ package routes
 
 import (
 	"golang_starter_kit_2025/app/controllers"
+	"golang_starter_kit_2025/app/feature/category"
 	"golang_starter_kit_2025/app/feature/product"
 	"golang_starter_kit_2025/app/middleware"
 	"golang_starter_kit_2025/app/services"
@@ -24,9 +25,8 @@ func RegisterRoutes(route *gin.Engine) {
 		authRoutes.GET("/refresh", authController.Refresh)
 	}
 
-	categoryService := services.CategoryService{}
-	categoryController := controllers.NewCategoryController(categoryService)
-	categoryRoutes := route.Group("/categories", middleware.AuthMiddleware())
+	categoryController := category.NewCategoryController()
+	categoryRoutes := route.Group("/categories")
 	{
 		categoryRoutes.GET("/", categoryController.List)
 		categoryRoutes.GET("/:id", categoryController.Get)
