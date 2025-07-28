@@ -159,7 +159,7 @@ func (c *UserController) AssignRoles(ctx *gin.Context) {
 // @Tags         users
 // @Produce      json
 // @Param        id path string true "User ID"
-// @Success      200 {array} models.Role "List of roles"
+// @Success      200 {array} role.Role "List of roles"
 // @Failure      500 {object} map[string]string "Internal Server Error"
 // @Router       /users/{id}/roles [get]
 func (c *UserController) GetRoles(ctx *gin.Context) {
