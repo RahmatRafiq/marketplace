@@ -1,14 +1,24 @@
-package services
+package product
 
 import (
-	"log"
-
 	"golang_starter_kit_2025/app/models"
-	"golang_starter_kit_2025/app/requests"
 	"golang_starter_kit_2025/facades"
+	"log"
 
 	"github.com/gin-gonic/gin"
 )
+
+type FileService struct{}
+
+func (fs *FileService) StoreBase64File(image string, folder string, subfolder string) (*string, error) {
+	return &image, nil
+}
+
+type FilterRequest struct {
+	Search         *string
+	OrderBy        *string
+	OrderDirection *string
+}
 
 type ProductService struct {
 	fileService FileService
@@ -20,8 +30,8 @@ func NewProductService() *ProductService {
 	}
 }
 
-func (service *ProductService) GetAll(filters requests.FilterRequest) ([]models.Product, error) {
-	var products []models.Product
+func (service *ProductService) GetAll(filters FilterRequest) ([]Product, error) {
+	var products []Product
 	query := facades.DB
 
 	if filters.Search != nil {
@@ -42,18 +52,17 @@ func (service *ProductService) GetAll(filters requests.FilterRequest) ([]models.
 	return products, nil
 }
 
-func (service *ProductService) GetByID(id string) (models.Product, error) {
-	var product models.Product
+func (service *ProductService) GetByID(id string) (Product, error) {
+	var product Product
 	if err := facades.DB.First(&product, id).Error; err != nil {
 		return product, err
 	}
 	return product, nil
 }
 
-func (service *ProductService) Put(ctx *gin.Context, request requests.ProductRequest) (*models.Product, error) {
-	var product models.Product
+func (service *ProductService) Put(ctx *gin.Context, request ProductRequest) (*Product, error) {
+	var product Product
 
-	// Upload images if any
 	var filenames []string
 	if request.Images != nil {
 		for _, image := range request.Images {
@@ -66,16 +75,13 @@ func (service *ProductService) Put(ctx *gin.Context, request requests.ProductReq
 		}
 	}
 
-	// Handle ProductBase: cari base dengan nama/slug/brand, jika tidak ada buat baru
 	var productBase models.ProductBase
 	if request.ProductBaseID != 0 {
 		facades.DB.First(&productBase, request.ProductBaseID)
 	} else {
-		// Cek base by name/slug/brand, jika tidak ada buat baru
 		facades.DB.Where("name = ? AND brand = ?", request.Name, request.Brand).FirstOrCreate(&productBase, models.ProductBase{})
 	}
 
-	// Map fields dari request
 	product.ID = request.ID
 	product.ProductBaseID = productBase.ID
 	product.Name = request.Name
@@ -95,59 +101,38 @@ func (service *ProductService) Put(ctx *gin.Context, request requests.ProductReq
 	product.Images = filenames
 	product.ReceivedAt = request.ReceivedAt
 
-	// Map relasi M2M
 	if len(request.CategoryIDs) > 0 {
 		var categories []models.Category
 		facades.DB.Where("id IN ?", request.CategoryIDs).Find(&categories)
-		var categoryPtrs []*models.Category
-		for i := range categories {
-			categoryPtrs = append(categoryPtrs, &categories[i])
-		}
-		product.Categories = categoryPtrs
+		product.Categories = categories
 	}
 	if len(request.WarehouseIDs) > 0 {
 		var warehouses []models.Warehouse
 		facades.DB.Where("id IN ?", request.WarehouseIDs).Find(&warehouses)
-		var warehousePtrs []*models.Warehouse
-		for i := range warehouses {
-			warehousePtrs = append(warehousePtrs, &warehouses[i])
-		}
-		product.Warehouses = warehousePtrs
+		product.Warehouses = warehouses
 	}
 	if len(request.TagIDs) > 0 {
 		var tags []models.Tag
 		facades.DB.Where("id IN ?", request.TagIDs).Find(&tags)
-		var tagPtrs []*models.Tag
-		for i := range tags {
-			tagPtrs = append(tagPtrs, &tags[i])
-		}
-		product.Tags = tagPtrs
+		product.Tags = tags
 	}
 	if len(request.PromoIDs) > 0 {
 		var promos []models.Promo
 		facades.DB.Where("id IN ?", request.PromoIDs).Find(&promos)
-		var promoPtrs []*models.Promo
-		for i := range promos {
-			promoPtrs = append(promoPtrs, &promos[i])
-		}
-		product.Promos = promoPtrs
+		product.Promos = promos
 	}
 	if len(request.RelatedIDs) > 0 {
 		var related []models.Product
 		facades.DB.Where("id IN ?", request.RelatedIDs).Find(&related)
-		var relatedPtrs []*models.Product
-		for i := range related {
-			relatedPtrs = append(relatedPtrs, &related[i])
-		}
-		product.Related = relatedPtrs
+		product.Related = related
 	}
 
-	if count := facades.DB.Model(&models.Product{}).Where("id = ?", request.ID).Find(&map[string]interface{}{}).RowsAffected; count == 0 {
+	if count := facades.DB.Model(&Product{}).Where("id = ?", request.ID).Find(&map[string]interface{}{}).RowsAffected; count == 0 {
 		if err := facades.DB.Create(&product).Error; err != nil {
 			return &product, err
 		}
 	} else {
-		if err := facades.DB.Model(&models.Product{}).Where("id = ?", request.ID).Updates(&product).Error; err != nil {
+		if err := facades.DB.Model(&Product{}).Where("id = ?", request.ID).Updates(&product).Error; err != nil {
 			return &product, err
 		}
 		if err := facades.DB.First(&product, request.ID).Error; err != nil {
@@ -159,7 +144,7 @@ func (service *ProductService) Put(ctx *gin.Context, request requests.ProductReq
 }
 
 func (service *ProductService) Delete(id string) error {
-	result := facades.DB.Delete(&models.Product{}, id)
+	result := facades.DB.Delete(&Product{}, id)
 	if result.Error != nil {
 		return result.Error
 	}
