@@ -1,6 +1,7 @@
 package product
 
 import (
+	"golang_starter_kit_2025/app/features/category"
 	"golang_starter_kit_2025/app/models"
 	"golang_starter_kit_2025/facades"
 	"log"
@@ -102,7 +103,7 @@ func (service *ProductService) Put(ctx *gin.Context, request ProductRequest) (*P
 	product.ReceivedAt = request.ReceivedAt
 
 	if len(request.CategoryIDs) > 0 {
-		var categories []models.Category
+		var categories []category.Category
 		facades.DB.Where("id IN ?", request.CategoryIDs).Find(&categories)
 		product.Categories = categories
 	}

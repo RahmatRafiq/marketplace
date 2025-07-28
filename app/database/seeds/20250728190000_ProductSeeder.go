@@ -1,10 +1,11 @@
 package seeds
 
 import (
-	"golang_starter_kit_2025/app/models"
 	"log"
 	"time"
 
+	"golang_starter_kit_2025/app/features/product"
+	"golang_starter_kit_2025/app/models"
 	"math/rand"
 	"strconv"
 
@@ -25,10 +26,10 @@ func SeedProductSeeder(db *gorm.DB) error {
 	}
 
 	// Seeder 20 produk varian dengan faker
-	var products []models.Product
+	var products []product.Product
 	for i := 1; i <= 20; i++ {
 		name := faker.Name() + " - Varian " + string(rune('A'+i-1))
-		products = append(products, models.Product{
+		products = append(products, product.Product{
 			ProductBaseID:     base.ID,
 			Name:              name,
 			Slug:              faker.Username(),
@@ -58,5 +59,5 @@ func SeedProductSeeder(db *gorm.DB) error {
 
 func RollbackProductSeeder(db *gorm.DB) error {
 	log.Println("🗑️ Rolling back ProductSeeder…")
-	return db.Unscoped().Where("name LIKE ?", "Produk Contoh - Varian %").Delete(&models.Product{}).Error
+	return db.Unscoped().Where("name LIKE ?", "Produk Contoh - Varian %").Delete(&product.Product{}).Error
 }

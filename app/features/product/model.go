@@ -1,6 +1,7 @@
 package product
 
 import (
+	"golang_starter_kit_2025/app/features/category"
 	"golang_starter_kit_2025/app/helpers"
 	"golang_starter_kit_2025/app/models"
 	"time"
@@ -30,10 +31,10 @@ type Product struct {
 	Images            []string            `json:"images" gorm:"serializer:json"`
 	ReceivedAt        time.Time           `json:"received_at"`
 
-	Categories []models.Category  `gorm:"many2many:product_categories;" json:"categories"`
-	Warehouses []models.Warehouse `gorm:"many2many:product_warehouses;" json:"warehouses"`
-	Tags       []models.Tag       `gorm:"many2many:product_tags;" json:"tags"`
-	Promos     []models.Promo     `gorm:"many2many:product_promos;" json:"promos"`
+	Categories []category.Category `gorm:"many2many:product_categories;" json:"categories"`
+	Warehouses []models.Warehouse  `gorm:"many2many:product_warehouses;" json:"warehouses"`
+	Tags       []models.Tag        `gorm:"many2many:product_tags;" json:"tags"`
+	Promos     []models.Promo      `gorm:"many2many:product_promos;" json:"promos"`
 
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
