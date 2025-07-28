@@ -2,8 +2,8 @@ package routes
 
 import (
 	"golang_starter_kit_2025/app/controllers"
-	"golang_starter_kit_2025/app/feature/category"
-	"golang_starter_kit_2025/app/feature/product"
+	"golang_starter_kit_2025/app/features/category"
+	"golang_starter_kit_2025/app/features/product"
 	"golang_starter_kit_2025/app/middleware"
 	"golang_starter_kit_2025/app/services"
 	"golang_starter_kit_2025/facades"
