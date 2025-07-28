@@ -3,7 +3,10 @@ package routes
 import (
 	"golang_starter_kit_2025/app/controllers"
 	"golang_starter_kit_2025/app/features/category"
+	"golang_starter_kit_2025/app/features/permission"
 	"golang_starter_kit_2025/app/features/product"
+	"golang_starter_kit_2025/app/features/role"
+	"golang_starter_kit_2025/app/features/user"
 	"golang_starter_kit_2025/app/middleware"
 	"golang_starter_kit_2025/app/services"
 	"golang_starter_kit_2025/facades"
@@ -43,7 +46,7 @@ func RegisterRoutes(route *gin.Engine) {
 		productRoutes.DELETE("/:id", productController.Delete)
 	}
 
-	userController := controllers.NewUserController()
+	userController := user.NewUserController()
 	userRoutes := route.Group("/users", middleware.AuthMiddleware())
 	{
 		userRoutes.GET("", userController.List)
@@ -54,8 +57,7 @@ func RegisterRoutes(route *gin.Engine) {
 		userRoutes.GET("/:id/roles", userController.GetRoles)
 	}
 
-	roleService := services.RoleService{}
-	roleController := controllers.NewRoleController(roleService)
+	roleController := role.NewRoleController()
 	roleRoutes := route.Group("/roles", middleware.AuthMiddleware())
 	{
 		roleRoutes.GET("", roleController.List)
@@ -65,8 +67,7 @@ func RegisterRoutes(route *gin.Engine) {
 		roleRoutes.GET("/:id/permissions", roleController.GetPermissions)
 	}
 
-	permissionService := services.PermissionService{}
-	permissionController := controllers.NewPermissionController(permissionService)
+	permissionController := permission.NewPermissionController()
 	permissionRoutes := route.Group("/permissions", middleware.AuthMiddleware())
 	{
 		permissionRoutes.GET("", permissionController.List)

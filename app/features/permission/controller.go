@@ -9,14 +9,14 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-type PermissionController struct {
-	service *PermissionService
-}
-
 func NewPermissionController() *PermissionController {
 	return &PermissionController{
 		service: NewPermissionService(),
 	}
+}
+
+type PermissionController struct {
+	service *PermissionService
 }
 
 // @Summary		Get All Permissions
