@@ -40,6 +40,10 @@ var SeederList = []Seeder{
 		Run:      seeds.SeedPermissionSeeder,
 		Rollback: seeds.RollbackPermissionSeeder,
 	},
+	{Name: "RoleHasPermissionsSeeder",
+		Run:      seeds.SeedRoleHasPermissionsSeeder,
+		Rollback: seeds.RollbackRoleHasPermissionsSeeder,
+	},
 }
 
 func ensureSeedsTable() error {
@@ -94,7 +98,19 @@ func RunAllSeeders() error {
 			pending = append(pending, s)
 		}
 	}
-	sort.Slice(pending, func(i, j int) bool { return pending[i].Name < pending[j].Name })
+	// Urutkan berdasarkan timestamp pada nama file seeder (format: YYYYMMDDHHMMSS_NamaSeeder.go)
+	sort.Slice(pending, func(i, j int) bool {
+		// Ambil prefix angka dari nama seeder
+		getPrefix := func(name string) string {
+			for k := 0; k < len(name); k++ {
+				if name[k] < '0' || name[k] > '9' {
+					return name[:k]
+				}
+			}
+			return name
+		}
+		return getPrefix(pending[i].Name) < getPrefix(pending[j].Name)
+	})
 
 	for _, s := range pending {
 		log.Println("🌱 Seeding:", s.Name)

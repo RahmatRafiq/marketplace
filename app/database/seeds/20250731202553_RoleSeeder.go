@@ -10,10 +10,14 @@ import (
 func SeedRoleSeeder(db *gorm.DB) error {
 	log.Println("🌱 Seeding RoleSeeder...")
 
-	data := models.Role{
-		Role: "User",
+	roleNames := []string{"Admin", "User", "Manajer", "Kasir", "Supervisor", "Staf", "Pelanggan", "Teknisi", "Marketing", "Auditor"}
+	var roles []models.Role
+	for _, name := range roleNames {
+		roles = append(roles, models.Role{
+			Role: name,
+		})
 	}
-	if err := db.Create(&data).Error; err != nil {
+	if err := db.Create(&roles).Error; err != nil {
 		return err
 	}
 	return nil
@@ -22,6 +26,7 @@ func SeedRoleSeeder(db *gorm.DB) error {
 func RollbackRoleSeeder(db *gorm.DB) error {
 	log.Println("🗑️ Rolling back RoleSeeder…")
 	return db.Unscoped().
-		Where("reference LIKE ?", "USR%").
+		Where("role LIKE ?", "%").
+		Delete(&models.Role{}).
 		Error
 }

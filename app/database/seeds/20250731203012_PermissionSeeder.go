@@ -4,21 +4,21 @@ import (
 	"golang_starter_kit_2025/app/models"
 	"log"
 
-	"github.com/go-faker/faker/v4"
 	"gorm.io/gorm"
 )
 
 func SeedPermissionSeeder(db *gorm.DB) error {
 	log.Println("🌱 Seeding PermissionSeeder...")
 
+	permissionNames := []string{
+		"lihat_produk", "tambah_produk", "edit_produk", "hapus_produk", "lihat_kategori", "tambah_kategori", "edit_kategori", "hapus_kategori", "lihat_user", "tambah_user", "edit_user", "hapus_user", "akses_laporan", "export_data", "import_data", "verifikasi_transaksi", "ubah_status", "akses_diskon", "akses_promo", "akses_stok",
+	}
 	var permissions []models.Permission
-	for i := 0; i < 20; i++ {
+	for _, name := range permissionNames {
 		permissions = append(permissions, models.Permission{
-			Permission: faker.Word(),
-			// Group:      faker.Word(),
+			Permission: name,
 		})
 	}
-
 	if err := db.Create(&permissions).Error; err != nil {
 		return err
 	}
@@ -28,6 +28,7 @@ func SeedPermissionSeeder(db *gorm.DB) error {
 func RollbackPermissionSeeder(db *gorm.DB) error {
 	log.Println("🗑️ Rolling back PermissionSeeder…")
 	return db.Unscoped().
-		Where("reference LIKE ?", "PER%").
+		Where("permission LIKE ?", "%").
+		Delete(&models.Permission{}).
 		Error
 }
