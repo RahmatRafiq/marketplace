@@ -25,21 +25,22 @@ func (*RoleService) GetAll() ([]Role, error) {
 
 func (*RoleService) Put(updatedRole Role) (Role, error) {
 	var role Role
-
-	if count := facades.DB.Model(&Role{}).Where("id = ?", updatedRole.ID).Find(&map[string]interface{}{}).RowsAffected; count == 0 {
+	if updatedRole.ID == 0 {
+		// Create new role
 		if err := facades.DB.Create(&updatedRole).Error; err != nil {
 			return role, err
 		}
+		// Fetch the created role with its ID
+		role = updatedRole
 	} else {
-		if err := facades.DB.Where("id = ?", updatedRole.ID).Updates(&updatedRole).Error; err != nil {
+		// Update existing role
+		if err := facades.DB.Model(&Role{}).Where("id = ?", updatedRole.ID).Updates(&updatedRole).Error; err != nil {
 			return role, err
 		}
-
 		if err := facades.DB.First(&role, updatedRole.ID).Error; err != nil {
 			return role, err
 		}
 	}
-
 	return role, nil
 }
 

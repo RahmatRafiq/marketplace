@@ -49,7 +49,7 @@ func (c *RoleController) List(ctx *gin.Context) {
 // @Tags			Role
 // @Accept			json
 // @Produce		json
-// @Param			role	body		requests.RoleRequestPut	true	"Role Data"
+// @Param			role	body		models.Role	true	"Role Data"
 // @Success		200	{object}	helpers.ResponseParams[models.Role]{item=models.Role}
 // @Failure		400	{object}	map[string]string	"Invalid input data"
 // @Failure		500	{object}	map[string]string	"Internal Server Error"
