@@ -32,6 +32,14 @@ var SeederList = []Seeder{
 		Run:      seeds.SeedCategorySeeder,
 		Rollback: seeds.RollbackCategorySeeder,
 	},
+	{Name: "RoleSeeder",
+		Run:      seeds.SeedRoleSeeder,
+		Rollback: seeds.RollbackRoleSeeder,
+	},
+	{Name: "PermissionSeeder",
+		Run:      seeds.SeedPermissionSeeder,
+		Rollback: seeds.RollbackPermissionSeeder,
+	},
 }
 
 func ensureSeedsTable() error {

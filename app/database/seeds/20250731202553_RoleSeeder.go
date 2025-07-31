@@ -1,7 +1,7 @@
 package seeds
 
 import (
-	"golang_starter_kit_2025/app/features/role"
+	"golang_starter_kit_2025/app/models"
 	"log"
 
 	"gorm.io/gorm"
@@ -10,9 +10,8 @@ import (
 func SeedRoleSeeder(db *gorm.DB) error {
 	log.Println("🌱 Seeding RoleSeeder...")
 
-	data := role.Role{
-		Name:  "User",
-		Group: "USR",
+	data := models.Role{
+		Role: "User",
 	}
 	if err := db.Create(&data).Error; err != nil {
 		return err
