@@ -108,6 +108,17 @@ type AssignPermissionsRequest struct {
 	Permissions []uint `json:"permissions"`
 }
 
+// @Summary      Assign permissions to a role
+// @Description  Assign one or more permissions to a role
+// @Tags         Role
+// @Accept       json
+// @Produce      json
+// @Param        id           path      string                   true  "Role ID"
+// @Param        permissions  body      AssignPermissionsRequest true  "Permissions to assign"
+// @Success      200          {object}  map[string]string        "Permissions assigned"
+// @Failure      400          {object}  map[string]string        "Invalid request"
+// @Failure      500          {object}  map[string]string        "Internal error"
+// @Router       /roles/{id}/permissions [post]
 func (c *RoleController) AssignPermissions(ctx *gin.Context) {
 	var req AssignPermissionsRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
